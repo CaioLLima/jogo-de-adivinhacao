@@ -6,17 +6,13 @@ namespace JogoDeAdivinhação
     {
         static void Main(string[] args)
         {
-            Random geradorDeNumeros = new Random();
-            int numSecreto = geradorDeNumeros.Next(1, 51);
-            int numTentativas;
-            int[] histChutes = new int[8];
-            int contChutes = 0;
-            
-
-            //pontuação 1000  -   (numero chutado - numero secreto) / 2      -   valor absoluto se valor for negatico
-
             while (true)
             {
+                Random geradorDeNumeros = new Random();
+                int numSecreto = geradorDeNumeros.Next(1, 51);
+                int numTentativas;
+                int[] histChutes = new int[8];
+                int contChutes = 0;
                 int pontuacao = 1000;
                 int vaPontucao;
                 Console.WriteLine("Jogo da Adivinhação");
@@ -33,11 +29,22 @@ namespace JogoDeAdivinhação
 
                 for (int i = numTentativas; i > 0; i--)
                 {
-                    Console.Write("\nChute um número (1 à 50) para tentar adivinhar: ");
-                    int numChute = Convert.ToInt32(Console.ReadLine());
+                    if (histChutes[0] != 0)
+                        Console.Write($"\nNúmeros chutados:  ");
 
                     for (int j = 0; j < histChutes.Length; j++)
                     {
+                        if (histChutes[j] != 0)
+                            Console.Write($"{ histChutes[j]}, ");
+                    }
+
+                    Console.Write("\nChute um número (1 à 50) para tentar adivinhar: ");
+                    int numChute = Convert.ToInt32(Console.ReadLine());
+                    
+
+                    for (int j = 0; j < histChutes.Length; j++)
+                    {   
+                           
                         if (histChutes[j] == numChute)
                         {
                             Console.WriteLine($"\nO número {numChute} já foi chutado. Tente novamente.");
@@ -81,8 +88,10 @@ namespace JogoDeAdivinhação
 
 
                 }
-
-                Console.WriteLine("\nSeu número de tentativas chegou a 0, você perdeu.");
+                if(numTentativas == 0){
+                    Console.WriteLine("\nSeu número de tentativas chegou a 0, você perdeu.");
+                }
+                
                 Console.WriteLine($"\nSua pontuação foi: {pontuacao}");
 
                 Console.Write("\nDeseja jogar novamente? (S/N)");
