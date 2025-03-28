@@ -15,19 +15,13 @@ namespace JogoDeAdivinhação
                 int contChutes = 0;
                 int pontuacao = 1000;
                 int vaPontucao;
-                Console.WriteLine("Jogo da Adivinhação");
+                int escolhaDificuldade;
 
-                Console.WriteLine("\nEscolha um nível de dificuldade.\n 1 - Fácil(8 Tentativas) \n 2 - Normal(6 Tentativas) \n 3 - Difícil(4 Tentativas)");
-                int escolhaDificuldade = Convert.ToInt32(Console.ReadLine());
+                ApresentarDificuldades();
 
-                if (escolhaDificuldade == 1)
-                    numTentativas = 8;
-                else if (escolhaDificuldade == 2)
-                    numTentativas = 6;
-                else
-                    numTentativas = 4;
+                
 
-                for (int i = numTentativas; i > 0; i--)
+                for (int i = DefinirNumTentativas(); i > 0; i--)
                 {
                     if (histChutes[0] != 0)
                         Console.Write($"\nNúmeros chutados:  ");
@@ -101,6 +95,30 @@ namespace JogoDeAdivinhação
                 if (continuar != "S")
                     break;
             }
+        }
+
+        static int ApresentarDificuldades()
+        {
+            Console.WriteLine("Jogo da Adivinhação");
+
+            Console.WriteLine("\nEscolha um nível de dificuldade.\n 1 - Fácil(8 Tentativas) \n 2 - Normal(6 Tentativas) \n 3 - Difícil(4 Tentativas)");
+            int escolhaDificuldade = Convert.ToInt32(Console.ReadLine());
+
+
+            return escolhaDificuldade;
+        }
+
+        static int DefinirNumTentativas()
+        {
+            int numTentativas;
+            if (ApresentarDificuldades() == 1)
+                numTentativas = 8;
+            else if (ApresentarDificuldades() == 2)
+                numTentativas = 6;
+            else
+                numTentativas = 4;
+
+            return numTentativas;
         }
     }
 }
