@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using System;
 
-namespace JogoDeAdivinhação
+namespace JogoDeAdivinhacao
 {
     internal class Program
     {
@@ -8,140 +8,130 @@ namespace JogoDeAdivinhação
         {
             while (true)
             {
-                Random geradorDeNumeros = new Random();
-                int numSecreto = geradorDeNumeros.Next(1, 51);
-                int[] histChutes = new int[8];
-                int contChutes = 0;
-                int pontuacao = 1000;
-                int escolhaDificuldade = ApresentarDificuldades();
-                int numTentativas = DefinirNumTentativas(escolhaDificuldade);
-
-                ApresentarDificuldades(); 
-
-                for (int i = numTentativas; i > 0; i--) 
-                {
-                    VerificaDiferenteDeZero(histChutes); 
-
-                    EscreveNumerosUsados(histChutes);
-
-                    ChuteJogador();
-
-                    VerificaSeChutouNumeroUsado(histChutes);
-
-                    numTentativas = VerificaAcertouMaiorMenor(numSecreto, numTentativas, pontuacao, histChutes, ref contChutes);
-                }
-
-                VerificaSePerdeu(numTentativas);
-
-                MostraPontuacao(pontuacao);
+                IniciarJogo();
 
                 if (!VerificaSeQuerNovamente())
                     break;
-
             }
+        }
+
+        static void IniciarJogo()
+        {
+            Random geradorDeNumeros = new Random();
+            int numSecreto = geradorDeNumeros.Next(1, 51);
+            int[] histChutes = new int[8];
+            int contChutes = 0;
+            int pontuacao = 1000;
+
+            int escolhaDificuldade = ApresentarDificuldades();
+            int numTentativas = DefinirNumTentativas(escolhaDificuldade);
+
+            while (numTentativas > 0)
+            {
+                VerificaDiferenteDeZero(histChutes);
+                EscreveNumerosUsados(histChutes);
+
+                int chute = ChuteJogador();
+
+                // Verifica se o número já foi chutado
+                while (VerificaSeChutouNumeroUsado(histChutes, chute))
+                {
+                    Console.WriteLine($"\nO número {chute} já foi chutado. Tente novamente.");
+                    chute = ChuteJogador();
+                }
+
+                histChutes[contChutes] = chute;
+                contChutes++;
+
+                numTentativas = VerificaAcertouMaiorMenor(numSecreto, numTentativas, ref pontuacao, chute);
+
+                if (chute == numSecreto)
+                    return;
+            }
+
+            VerificaSePerdeu(numTentativas);
+            MostraPontuacao(pontuacao);
         }
 
         static int ApresentarDificuldades()
         {
             Console.WriteLine("Jogo da Adivinhação");
-            Console.WriteLine("\nEscolha um nível de dificuldade.\n 1 - Fácil(8 Tentativas) \n 2 - Normal(6 Tentativas) \n 3 - Difícil(4 Tentativas)");
-            int escolhaDificuldade = Convert.ToInt32(Console.ReadLine());
-            return escolhaDificuldade;
+            Console.WriteLine("\nEscolha um nível de dificuldade.");
+            Console.WriteLine("1 - Fácil (8 Tentativas)");
+            Console.WriteLine("2 - Normal (6 Tentativas)");
+            Console.WriteLine("3 - Difícil (4 Tentativas)");
+            return Convert.ToInt32(Console.ReadLine());
         }
 
-        static int DefinirNumTentativas(int escolhaDifuculdade)
+        static int DefinirNumTentativas(int escolhaDificuldade)
         {
-            int numTentativas;
-            if (escolhaDifuculdade == 1)
-                numTentativas = 8;
-            else if (escolhaDifuculdade == 2)
-                numTentativas = 6;
-            else
-                numTentativas = 4;
-            return numTentativas;
+            if (escolhaDificuldade == 1) return 8;
+            if (escolhaDificuldade == 2) return 6;
+            return 4;
         }
 
         static void VerificaDiferenteDeZero(int[] histChutes)
         {
             if (histChutes[0] != 0)
-                        Console.Write($"\nNúmeros chutados:  ");
+                Console.Write("\nNúmeros chutados: ");
         }
 
         static void EscreveNumerosUsados(int[] histChutes)
         {
-            for (int j = 0; j < histChutes.Length; j++)
+            foreach (int num in histChutes)
             {
-                if (histChutes[j] != 0)
-                    Console.Write($"{histChutes[j]}, ");
+                if (num != 0)
+                    Console.Write($"{num}, ");
             }
         }
 
         static int ChuteJogador()
         {
-            Console.Write("\nChute um número (1 à 50) para tentar adivinhar: ");
-            int numChute = Convert.ToInt32(Console.ReadLine());
-            return numChute;
+            Console.Write("\nChute um número (1 à 50): ");
+            return Convert.ToInt32(Console.ReadLine());
         }
 
-        static void VerificaSeChutouNumeroUsado(int[] histChutes)
+        static bool VerificaSeChutouNumeroUsado(int[] histChutes, int chute)
         {
-            int chute = ChuteJogador();
-            for (int j = 0; j < histChutes.Length; j++)
+            foreach (int num in histChutes)
             {
-                if (histChutes[j] == chute)
-                {
-                    Console.WriteLine($"\nO número {ChuteJogador()} já foi chutado. Tente novamente.");
-                    Console.Write("\nChute um número (1 à 50) para tentar adivinhar: ");
-                    chute = Convert.ToInt32(Console.ReadLine());
-                }
+                if (num == chute)
+                    return true;
             }
+            return false;
         }
 
-        static int VerificaAcertouMaiorMenor(int numSecreto, int numTentativas, int pontuacao, int[] histChutes, ref int contChutes)
+        static int VerificaAcertouMaiorMenor(int numSecreto, int numTentativas, ref int pontuacao, int chute)
         {
-            int chute = ChuteJogador(); // Armazena o chute para evitar múltiplas chamadas
-
             if (chute == numSecreto)
             {
                 Console.WriteLine("\nParabéns!! Você acertou o número.");
                 Console.ReadLine();
-
+                return numTentativas;
             }
             else if (chute > numSecreto)
             {
                 numTentativas--;
-                Console.WriteLine($"\nVocê chutou um número maior, tente novamente. Você possui {numTentativas} tentativas. Pressione ENTER para prosseguir...");
-                Console.ReadLine();
-                Console.Clear();
-                
-                contChutes++;
+                Console.WriteLine($"\nVocê chutou um número maior. Tentativas restantes: {numTentativas}");
             }
-            else if (chute < numSecreto)
+            else
             {
                 numTentativas--;
-                Console.WriteLine($"\nVocê chutou um número menor, tente novamente. Você possui {numTentativas} tentativas. Pressione ENTER para prosseguir...");
-                Console.ReadLine();
-                Console.Clear();
-
-                contChutes++;
+                Console.WriteLine($"\nVocê chutou um número menor. Tentativas restantes: {numTentativas}");
             }
 
-            int vaPontuacao = (chute - numSecreto) / 2;
-            pontuacao = pontuacao - Math.Abs(vaPontuacao);
-            histChutes[contChutes] = ChuteJogador();
+            pontuacao -= Math.Abs((chute - numSecreto) / 2);
+            Console.WriteLine("Pressione ENTER para continuar...");
+            Console.ReadLine();
+            Console.Clear();
 
             return numTentativas;
-
-
         }
 
         static void VerificaSePerdeu(int numTentativas)
         {
             if (numTentativas == 0)
-            {
-                Console.WriteLine("\nSeu número de tentativas chegou a 0, você perdeu.");
-            }
-
+                Console.WriteLine("\nSuas tentativas acabaram! Você perdeu.");
         }
 
         static void MostraPontuacao(int pontuacao)
